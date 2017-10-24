@@ -1,0 +1,88 @@
+#!/bin/bash
+
+projectname=""
+python_interpreter=""
+
+usage()
+{
+    echo "Usage: flask-boilerplate <projectname (OPTIONAL)> [params]"
+    echo "Example: flask-boilerplate hello-world"
+    echo "Params:"
+    echo -e "\t-p\t--projectname\tName of the project you want to create"
+    echo -e "\t-i\t--interpreter\tPath to the python interpreter you want to use"
+    echo -e "\t-h\t--help\t\tPrints this message\n"
+}
+
+#Check if git is installed
+if [ $(which git) == "" ]; then
+	echo -e "ERROR:\tYou need to have git installed to proceed"
+	exit 1
+fi
+
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -p | --projectname )    shift
+                                projectname=$1
+                                ;;
+        -i | --interpreter )    shift
+								python_interpreter=$1
+                                ;;
+        -h | --help )           usage
+                                exit
+                                ;;
+        -* | --* )              echo -e "Incorrect param: $1\n"
+								usage
+                                exit 1
+                                ;;
+        *)
+								projectname=$1
+								;;
+    esac
+    shift
+done
+while [ "$projectname" == "" ]; do
+	read -p 'Project name: ' projectname
+
+	if [ "$projectname" == "" ]; then
+		echo -e "ERROR:\tYou have to set a name for your project\n"
+	fi
+done
+
+git clone https://github.com/JavierLuna/flask-boilerplate.git $projectname
+cd $projectname
+if [ "$python_interpreter" == "" ]; then
+	python_interpreter=$(which python3)
+	read -p 'Python interpreter [defaults '$python_interpreter']: ' python_interpreter
+	if [ -z "$python_interpreter" ]; then
+		python_interpreter=$(which python3)
+	fi
+fi
+
+if [ ! -f "$python_interpreter" ]; then
+	echo -e "ERROR:\tPython interpreter not found, aborting"
+	cd ..
+	rm -rf $projectname
+	exit 1
+fi
+
+#Check if pip and virtualenv are installed in that python interpreter
+if $python_interpreter -c "import pip;import virtualenv" &> /dev/null; then
+	true
+else
+	echo -e "ERROR:\tYour python interpreter must have pip and virtualenv modules installed to proceed"
+	cd ..
+	rm -rf $projectname
+	exit 1
+fi
+
+
+$python_interpreter -m pip install virtualenv
+$python_interpreter -m virtualenv env -p $python_interpreter
+source env/bin/activate
+pip install -r requirements.txt
+deactivate
+rm -rf .git
+echo '# '$projectname > README.md
+git init
+echo "Done!"

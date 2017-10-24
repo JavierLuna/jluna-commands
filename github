@@ -1,0 +1,117 @@
+#!/usr/bin/python
+import os
+import logging
+import argparse
+import json
+import urllib2
+
+GITHUB_API_URL = "https://api.github.com"
+
+
+def get_auth_token():
+    token = os.environ.get("GITHUB_API_TOKEN", False)
+    if not token:
+        logging.warning("Could not obtain the github auth token")
+        logging.warning("Check if the variable GITHUB_API_TOKEN exists in your system and holds a valid access token")
+        logging.warning("You can get one at https://github.com/settings/tokens")
+    return token
+
+
+def github_post(url, data, token=None):
+    headers = {'Content-Type': 'application/json'}
+    if token is not None:
+        headers['Authorization'] = "token %s" % token
+    req = urllib2.Request(GITHUB_API_URL + url, json.dumps(data), headers)
+    f = urllib2.urlopen(req)
+    response = f.read()
+    f.close()
+    return json.loads(response)
+
+
+def github_get(url, token=None):
+    headers = {}
+    if token is not None:
+        headers['Authorization'] = "token %s" % token
+    request = urllib2.Request(GITHUB_API_URL + url, headers=headers)
+    response = urllib2.urlopen(request).read()
+    return response
+
+
+def create_github_repo(args):
+    try:
+        response = github_post("/user/repos", {"name": args.projectname.replace(" ", "-"), "private": not args.private,
+                                               "auto_init": False}, get_auth_token())
+        logging.info("Created repo on %s" % response['full_name'])
+        return response['clone_url' if not args.ssh else 'ssh_url']
+    except urllib2.HTTPError, e:
+        logging.error("Could not create repository, github returned code %d (%s)" % (e.code, e.msg))
+        return None
+
+
+def upload_local_to_github(clone_url):
+    if os.path.isdir(".git"):
+        logging.info("Found local git repo, uploading")
+        os.system("git remote add origin %s" % clone_url)
+        os.system("git push -u origin master")
+    else:
+        logging.error("Could not find a local git repository, aborting upload")
+
+
+def list_all_repos(args):
+    try:
+        response = github_get("/user/repos", token=get_auth_token())
+        response = json.loads(response)
+        cloning_type = 'clone_url' if not args.ssh else 'ssh_url'
+        full_names = []
+        clone_urls = []
+        for repo in response:
+            full_names.append(repo['full_name'])
+            clone_urls.append(repo[cloning_type])
+        maxlen = len(max(full_names, key=len))
+        print "\n\nName" + " " * maxlen + "\tURL\n"
+        for i, j in zip(full_names, clone_urls):
+            print "%s\t%s" % (i.ljust(maxlen, " "), j)
+
+        print "\n"
+    except urllib2.HTTPError, e:
+        logging.error("Could not list repositories, github returned code %d (%s)" % (e.code, e.msg))
+
+
+def clone_repo(args):
+    try:
+        response = github_get("/repos/" + args.projectname, token=get_auth_token())
+        response = json.loads(response)
+        default = response['full_name'].split('/')[1]
+        clone_to = raw_input("Where do you want to clone it? [default %s] " % default) or default
+        os.system("git clone %s %s" % (response['clone_url' if not args.ssh else 'ssh_url'], clone_to))
+    except urllib2.HTTPError, e:
+        logging.error(
+            "Could not retrieve info about %s repo, github returned code %d (%s)" % (args.projectname, e.code, e.msg))
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("command", help="Command to execute", choices=['create', 'list', 'clone'], type=str)
+    parser.add_argument("-n", "--projectname", help="Project name", type=str, required=False, default="Default")
+    parser.add_argument("-p", "--public", help="Public repo", action="store_true")
+    parser.add_argument("-u", "--upload", help="Detects local git repo and commits it to github repo",
+                        action="store_true")
+    parser.add_argument("--ssh", help="Forces ssh use to push to repo", action="store_true")
+
+    args = parser.parse_args()
+
+    if args.command == 'create':
+        clone_url = create_github_repo(args)
+        if clone_url is None:
+            return
+        if args.upload:
+            upload_local_to_github(clone_url)
+    elif args.command == 'list':
+        list_all_repos(args)
+
+    elif args.command == 'clone':
+        clone_repo(args)
+
+
+if __name__ == '__main__':
+    main()
