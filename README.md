@@ -50,7 +50,7 @@ github command | optional-arguments
 
 #### Examples:
 - ##### Creates public github.com repository and uploads local git repo, using ssh
-``` github create -n jluna-commands -u --pulic --ssh```
+``` github create -n jluna-commands -u --public --ssh```
 
 - ##### Lists all of your github.com repositories
 ``` github list ```
@@ -88,7 +88,7 @@ If this project helped you in any way and you feel like supporting me well you c
 Why are you still here?
 You really want to make me happy don't you?
 
-So help me expand this command-list and improve already existing scripts!!
+So help me expand this command list and improve already existing scripts!!
 
 Thank you so much for everything!
 
