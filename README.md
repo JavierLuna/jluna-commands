@@ -43,13 +43,13 @@ github command | optional-arguments
 - **clone**: Clones a github.com repository by name in your machine
 
 #### Optional arguments:
-- **-n | --projectname **: Name of the project you want to create or clone.
-- **-p | --public **: Wether you want the repository you are about to create public or private. By default is set to private.
-- **-u | --upload **: Detects if you have a local repository in the current directory, sets the remote to the github.com repo you've created and pushes everything (commited)
+- **-n** | **--projectname**: Name of the project you want to create or clone.
+- **-p** | **--public**: Wether you want the repository you are about to create public or private. By default is set to private.
+- **-u** | **--upload**: Detects if you have a local repository in the current directory, sets the remote to the github.com repo you've created and pushes everything (commited)
 - **--ssh**: Forces the use of ssh when connecting to github.com (default is https)
 
 #### Examples:
-- #####Creates public github.com repository and uploads local git repo, using ssh
+- ##### Creates public github.com repository and uploads local git repo, using ssh
 ``` github create -n jluna-commands -u --pulic --ssh```
 
 - ##### Lists all of your github.com repositories
@@ -57,6 +57,7 @@ github command | optional-arguments
 
 - ##### Clones this github.com repository over ssh
 ``` github clone -n JavierLuna/jluna-commands --ssh ```
+
 (Notice how I use here the author part)
 </details>
 
