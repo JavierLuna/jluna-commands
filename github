@@ -39,7 +39,7 @@ def github_get(url, token=None):
 
 def create_github_repo(args):
     try:
-        response = github_post("/user/repos", {"name": args.projectname.replace(" ", "-"), "private": not args.private,
+        response = github_post("/user/repos", {"name": args.projectname.replace(" ", "-"), "private": not args.public,
                                                "auto_init": False}, get_auth_token())
         logging.info("Created repo on %s" % response['full_name'])
         return response['clone_url' if not args.ssh else 'ssh_url']
