@@ -64,9 +64,37 @@ github command | optional-arguments
 <details>
 <summary>Flask boilerplate</summary>
 
-#Flask boilerplate
+### Flask boilerplate
 
 #### TODO
+
+
+</details>
+
+<details>
+<summary>Env</summary>
+
+### Env
+
+Work with Python 3's virtual environments easier.
+
+It searches for a virtual environment in the current directory called ```env```, activates it and installs all dependencies listed in the ```requirements.txt``` file if found.
+
+If no virtual environment is found it creates a new one along the process.
+
+#### Usage:
+
+```env```
+
+And that's it, no parameters.
+
+
+#### Why not using virtualenvwrapper?
+
+I like my virtual environments in the project's root directory, where I can see them.
+It is easier to manage them and purge them if necessary.
+
+In addition I wanted to install everything automatically each time the virtual environment is activated through this command.
 
 
 </details>

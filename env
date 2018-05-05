@@ -1,0 +1,18 @@
+#!/bin/bash
+ENV_DIRECTORY=$(pwd)/env
+REQUIREMENTS_FILE=$(pwd)/requirements.txt
+
+if [ ! -d "$ENV_DIRECTORY" ]; 
+        then
+                echo "Virtual environment not found, creating..."
+                python3 -m virtualenv env --python=python3
+fi
+
+source env/bin/activate
+echo "Virtual environment activated!"
+
+if [ -f "$REQUIREMENTS_FILE" ];
+        then
+                echo "requirements.txt found, installing..."
+                pip install -r requirements.txt
+fi
